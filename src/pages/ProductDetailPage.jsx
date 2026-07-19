@@ -4,7 +4,6 @@ import { ShoppingCart, ChevronLeft, Star, Check } from '../icons';
 import { useLanguage } from '../context/LanguageContext';
 import { useCart } from '../context/CartContext';
 import { products } from '../data/products';
-import ProductCard from '../components/ProductCard/ProductCard';
 import { logInquiry } from '../utils/logInquiry';
 
 export default function ProductDetailPage() {
@@ -30,8 +29,6 @@ export default function ProductDetailPage() {
       </div>
     );
   }
-
-  const related = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   const handleAddToCart = () => {
     addToCart({
@@ -303,17 +300,6 @@ export default function ProductDetailPage() {
           </div>
         </div>
 
-        {/* Related products */}
-        {related.length > 0 && (
-          <div style={{ marginTop: 80 }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, letterSpacing: '-0.02em', marginBottom: 32 }}>
-              {isAr ? 'منتجات مشابهة' : 'Related Products'}
-            </h2>
-            <div className="products-grid">
-              {related.map(p => <ProductCard key={p.id} product={p} />)}
-            </div>
-          </div>
-        )}
       </div>
     </main>
   );

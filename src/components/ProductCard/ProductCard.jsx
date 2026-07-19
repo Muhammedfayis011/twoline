@@ -1,14 +1,14 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronRight, ChevronLeft } from '../../icons';
 import { useLanguage } from '../../context/LanguageContext';
 import { useCart } from '../../context/CartContext';
-import ProductModal from '../ProductModal/ProductModal';
 
 export default function ProductCard({ product }) {
   const { t, isAr } = useLanguage();
   const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [selectedColor, setSelectedColor] = useState(0);
-  const [showModal, setShowModal] = useState(false);
 
   const selectedColorHex = product.colors[selectedColor];
 
@@ -27,66 +27,61 @@ export default function ProductCard({ product }) {
     };
   };
 
+  const goToDetail = () => {
+    navigate(`/product/${product.id}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <>
-      <article className="product-card" id={`product-card-${product.id}`}>
-        {/* Image */}
-        <div
-          className="product-card-img"
-          onClick={() => setShowModal(true)}
-          style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
-        >
-          <img src={product.image} alt={t[product.nameKey]} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          <div style={getOverlayStyle(selectedColorHex)} />
-          {product.badge && (
-            <span className="product-badge">{product.badge}</span>
-          )}
-        </div>
+    <article className="product-card" id={`product-card-${product.id}`}>
+      {/* Image */}
+      <div
+        className="product-card-img"
+        onClick={goToDetail}
+        style={{ cursor: 'pointer', position: 'relative', overflow: 'hidden' }}
+      >
+        <img src={product.image} alt={t[product.nameKey]} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        <div style={getOverlayStyle(selectedColorHex)} />
+        {product.badge && (
+          <span className="product-badge">{product.badge}</span>
+        )}
+      </div>
 
-        <div className="product-card-body">
-          <h3 className="product-card-name">{t[product.nameKey]}</h3>
-          <p className="product-card-desc">{t[product.descKey]}</p>
+      <div className="product-card-body">
+        <h3 className="product-card-name">{t[product.nameKey]}</h3>
+        <p className="product-card-desc">{t[product.descKey]}</p>
 
-          {/* Color Swatches */}
-          <div className="swatch-row">
-            {product.colors.map((color, i) => (
-              <button
-                key={i}
-                className={`swatch ${i === selectedColor ? 'active' : ''}`}
-                style={{ backgroundColor: color }}
-                onClick={(e) => { e.stopPropagation(); setSelectedColor(i); }}
-                aria-label={`Color ${i + 1}`}
-                id={`swatch-${product.id}-${i}`}
-              />
-            ))}
-          </div>
-
-          <div className="product-card-footer">
-            <div className="product-price">
-              <span className="product-price-label">{t.from_price}</span>
-              <span className="product-price-value">
-                {product.price.toLocaleString()} <span>{t.aed}</span>
-              </span>
-            </div>
+        {/* Color Swatches */}
+        <div className="swatch-row">
+          {product.colors.map((color, i) => (
             <button
-              className="btn btn-primary btn-sm"
-              id={`explore-btn-${product.id}`}
-              onClick={() => setShowModal(true)}
-            >
-              {t.explore}
-              {isAr ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-            </button>
-          </div>
+              key={i}
+              className={`swatch ${i === selectedColor ? 'active' : ''}`}
+              style={{ backgroundColor: color }}
+              onClick={(e) => { e.stopPropagation(); setSelectedColor(i); }}
+              aria-label={`Color ${i + 1}`}
+              id={`swatch-${product.id}-${i}`}
+            />
+          ))}
         </div>
-      </article>
 
-      {/* Product Detail Modal */}
-      {showModal && (
-        <ProductModal
-          product={product}
-          onClose={() => setShowModal(false)}
-        />
-      )}
-    </>
+        <div className="product-card-footer">
+          <div className="product-price">
+            <span className="product-price-label">{t.from_price}</span>
+            <span className="product-price-value">
+              {product.price.toLocaleString()} <span>{t.aed}</span>
+            </span>
+          </div>
+          <button
+            className="btn btn-primary btn-sm"
+            id={`explore-btn-${product.id}`}
+            onClick={goToDetail}
+          >
+            {t.explore}
+            {isAr ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }
