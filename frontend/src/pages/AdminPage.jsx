@@ -36,15 +36,19 @@ export default function AdminPage() {
   }, []);
 
   const loadData = () => {
-    // Load Inquiries
-    const savedInqs = localStorage.getItem('twoline_inquiries');
-    if (savedInqs) {
-      try {
-        setInquiries(JSON.parse(savedInqs));
-      } catch (e) {
-        setInquiries([]);
-      }
-    }
+    // Load Inquiries from Backend
+    fetch('http://localhost:5000/api/inquiries')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setInquiries(data);
+      })
+      .catch(err => {
+        console.error('API Error:', err);
+        const savedInqs = localStorage.getItem('twoline_inquiries');
+        if (savedInqs) {
+          try { setInquiries(JSON.parse(savedInqs)); } catch (e) { setInquiries([]); }
+        }
+      });
 
     // Load Projects
     const savedProjs = localStorage.getItem('twoline_completed_works');
@@ -360,7 +364,7 @@ export default function AdminPage() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 {inquiries.map((inq) => (
                   <div 
-                    key={inq.id}
+                    key={inq._id || inq.id}
                     style={{
                       background: 'var(--surface-2)',
                       border: '1px solid var(--border)',
@@ -432,10 +436,16 @@ export default function AdminPage() {
                           💬 {isAr ? 'رد على واتساب' : 'Reply on WhatsApp'}
                         </a>
                         <button
-                          onClick={() => {
-                            const updated = inquiries.filter(i => i.id !== inq.id);
-                            setInquiries(updated);
-                            localStorage.setItem('twoline_inquiries', JSON.stringify(updated));
+                          onClick={async () => {
+                            const idToDelete = inq._id || inq.id;
+                            try {
+                              if (inq._id) await fetch(`http://localhost:5000/api/inquiries/${inq._id}`, { method: 'DELETE' });
+                              const updated = inquiries.filter(i => (i._id || i.id) !== idToDelete);
+                              setInquiries(updated);
+                              localStorage.setItem('twoline_inquiries', JSON.stringify(updated));
+                            } catch (e) {
+                              console.error(e);
+                            }
                           }}
                           style={{
                             padding: '7px 14px', borderRadius: 'var(--radius-sm)',

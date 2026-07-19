@@ -9,21 +9,31 @@
  * @param {string} [data.details] - Full message / details text
  * @param {string} [data.dimensions] - Extra info line (product, location, email…)
  */
-export function logInquiry({ type, name, phone = '—', details = '', dimensions = '' }) {
+export async function logInquiry({ type, name, phone = '—', details = '', dimensions = '' }) {
   try {
+    const payload = { type, name, phone, details, dimensions };
+    
+    // Send to our new Node.js MongoDB backend
+    await fetch('http://localhost:5000/api/inquiries', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+    
+    // Also keep local storage as a fallback/backup just in case backend is offline
     const saved = localStorage.getItem('twoline_inquiries');
     const list = saved ? JSON.parse(saved) : [];
     list.unshift({
       id: Date.now(),
-      type,
-      name,
-      phone,
-      dimensions,
-      details,
+      ...payload,
       date: new Date().toLocaleString('en-GB'),
     });
     localStorage.setItem('twoline_inquiries', JSON.stringify(list));
-  } catch (_) {
+    
+  } catch (err) {
+    console.error('Error logging inquiry:', err);
     // Silently fail — never block WhatsApp opening
   }
 }
