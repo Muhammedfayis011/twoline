@@ -39,7 +39,8 @@ export default function AdminPage() {
 
   const loadData = () => {
     // Load Inquiries from Backend
-    fetch('http://localhost:5000/api/inquiries')
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    fetch(`${API_URL}/api/inquiries`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setInquiries(data);
@@ -53,7 +54,8 @@ export default function AdminPage() {
       });
 
     // Load Projects from Backend
-    fetch('http://localhost:5000/api/projects')
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    fetch(`${API_URL}/api/projects`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) setProjects(data);
@@ -164,7 +166,8 @@ export default function AdminPage() {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/projects', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${API_URL}/api/projects`, {
         method: 'POST',
         body: formData
       });
@@ -194,7 +197,8 @@ export default function AdminPage() {
   // Delete a project
   const handleDeleteProject = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/projects/${id}`, { method: 'DELETE' });
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      await fetch(`${API_URL}/api/projects/${id}`, { method: 'DELETE' });
       const updated = projects.filter(p => (p._id || p.id) !== id);
       setProjects(updated);
       localStorage.setItem('twoline_completed_works', JSON.stringify(updated));
@@ -470,7 +474,8 @@ export default function AdminPage() {
                           onClick={async () => {
                             const idToDelete = inq._id || inq.id;
                             try {
-                              if (inq._id) await fetch(`http://localhost:5000/api/inquiries/${inq._id}`, { method: 'DELETE' });
+                              const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                              if (inq._id) await fetch(`${API_URL}/api/inquiries/${inq._id}`, { method: 'DELETE' });
                               const updated = inquiries.filter(i => (i._id || i.id) !== idToDelete);
                               setInquiries(updated);
                               localStorage.setItem('twoline_inquiries', JSON.stringify(updated));

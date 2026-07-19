@@ -14,7 +14,8 @@ export async function logInquiry({ type, name, phone = '—', details = '', dime
     const payload = { type, name, phone, details, dimensions };
     
     // Send to our new Node.js MongoDB backend
-    await fetch('http://localhost:5000/api/inquiries', {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    await fetch(`${API_URL}/api/inquiries`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
