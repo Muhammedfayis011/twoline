@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, ChevronLeft, Star, Check } from '../icons';
 import { useLanguage } from '../context/LanguageContext';
@@ -18,6 +18,15 @@ export default function ProductDetailPage() {
   const [selectedFabric, setSelectedFabric] = useState(0);
   const [activeTab, setActiveTab] = useState('description');
   const [added, setAdded] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
+
+  // Close lightbox on Escape key
+  useEffect(() => {
+    if (!lightbox) return;
+    const handler = (e) => { if (e.key === 'Escape') setLightbox(false); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [lightbox]);
 
   if (!product) {
     return (
@@ -74,21 +83,33 @@ export default function ProductDetailPage() {
         <div className="product-detail-grid">
           {/* Gallery */}
           <div className="product-gallery">
-            <div className="gallery-main" style={{ position: 'relative', overflow: 'hidden' }}>
-              <img src={product.image} alt={t[product.nameKey]} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <div
+              className="gallery-main"
+              onClick={() => setLightbox(true)}
+              title={isAr ? 'انقر لعرض الصورة كاملة' : 'Click to view full image'}
+              style={{ position: 'relative', overflow: 'hidden', cursor: 'zoom-in' }}
+            >
+              <img src={product.image} alt={t[product.nameKey]} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform 0.4s ease' }} />
+              {/* Color overlay */}
               <div style={{
-                position: 'absolute',
-                inset: 0,
+                position: 'absolute', inset: 0,
                 backgroundColor: product.colors[selectedColor],
                 mixBlendMode: 'multiply',
-                opacity: (product.colors[selectedColor] === '#FFFFFF' || product.colors[selectedColor] === '#F5F5F0') 
-                  ? 0 
-                  : (product.colors[selectedColor] === '#1A1A1A' || product.colors[selectedColor] === '#2C2C2C' || product.colors[selectedColor] === '#4A4A4A' || product.colors[selectedColor] === '#6B6B6B' || product.colors[selectedColor] === '#8B8B8B') 
-                  ? 0.5 
-                  : 0.35,
+                opacity: (product.colors[selectedColor] === '#FFFFFF' || product.colors[selectedColor] === '#F5F5F0')
+                  ? 0
+                  : (product.colors[selectedColor] === '#1A1A1A' || product.colors[selectedColor] === '#2C2C2C' || product.colors[selectedColor] === '#4A4A4A' || product.colors[selectedColor] === '#6B6B6B' || product.colors[selectedColor] === '#8B8B8B')
+                  ? 0.5 : 0.35,
                 pointerEvents: 'none',
                 transition: 'background-color 0.3s ease, opacity 0.3s ease',
               }} />
+              {/* Zoom hint icon */}
+              <div style={{
+                position: 'absolute', bottom: 12, right: 12,
+                background: 'rgba(0,0,0,0.55)', borderRadius: '50%',
+                width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#fff', fontSize: '1rem', backdropFilter: 'blur(4px)',
+                pointerEvents: 'none',
+              }}>🔍</div>
             </div>
             {product.badge && (
               <div style={{ marginTop: 12 }}>
@@ -96,6 +117,71 @@ export default function ProductDetailPage() {
               </div>
             )}
           </div>
+
+          {/* ── Full-Screen Lightbox ── */}
+          {lightbox && (
+            <div
+              onClick={() => setLightbox(false)}
+              style={{
+                position: 'fixed', inset: 0, zIndex: 99999,
+                background: 'rgba(0,0,0,0.96)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'zoom-out',
+                animation: 'lbFadeIn 0.22s ease',
+              }}
+            >
+              {/* Close button */}
+              <button
+                onClick={() => setLightbox(false)}
+                style={{
+                  position: 'fixed', top: 18, right: 20, zIndex: 100000,
+                  background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '50%', width: 44, height: 44,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: '#fff', fontSize: '1.3rem', cursor: 'pointer',
+                  backdropFilter: 'blur(8px)',
+                  transition: 'background 0.2s ease',
+                }}
+                aria-label="Close"
+              >✕</button>
+
+              {/* Full image */}
+              <img
+                src={product.image}
+                alt={t[product.nameKey]}
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  maxWidth: '95vw',
+                  maxHeight: '95vh',
+                  objectFit: 'contain',
+                  borderRadius: 8,
+                  boxShadow: '0 32px 80px rgba(0,0,0,0.8)',
+                  animation: 'lbZoomIn 0.3s cubic-bezier(0.34,1.56,0.64,1) both',
+                  cursor: 'default',
+                }}
+              />
+
+              {/* Product name label at bottom */}
+              <div style={{
+                position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+                color: 'rgba(255,255,255,0.75)', fontSize: '0.85rem', fontWeight: 600,
+                background: 'rgba(0,0,0,0.5)', padding: '8px 20px',
+                borderRadius: 40, backdropFilter: 'blur(8px)',
+                pointerEvents: 'none', whiteSpace: 'nowrap',
+              }}>
+                {t[product.nameKey]} &nbsp;·&nbsp; {isAr ? 'اضغط للإغلاق' : 'Click anywhere to close'}
+              </div>
+
+              <style>{`
+                @keyframes lbFadeIn { from { opacity:0 } to { opacity:1 } }
+                @keyframes lbZoomIn {
+                  from { opacity:0; transform: scale(0.82); }
+                  to   { opacity:1; transform: scale(1); }
+                }
+                .gallery-main:hover img { transform: scale(1.03); }
+              `}</style>
+            </div>
+          )}
 
           {/* Info */}
           <div>
