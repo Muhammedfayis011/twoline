@@ -12,7 +12,7 @@ const MONGO_URI = process.env.MONGO_URI;
 
 // Connect to MongoDB
 if (MONGO_URI) {
-  mongoose.connect(MONGO_URI)
+  mongoose.connect(MONGO_URI, { family: 4 })
     .then(() => console.log('MongoDB connected successfully'))
     .catch(err => console.log('MongoDB connection error:', err));
 } else {
@@ -21,7 +21,10 @@ if (MONGO_URI) {
 
 // Routes
 const inquiryRoutes = require('./routes/inquiries');
+const projectRoutes = require('./routes/projects');
+
 app.use('/api/inquiries', inquiryRoutes);
+app.use('/api/projects', projectRoutes);
 
 app.get('/', (req, res) => {
   res.send('TWO LINE API is running...');

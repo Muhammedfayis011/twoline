@@ -24,7 +24,9 @@ export default function AdminPage() {
   // Form states for adding new completed work
   const [projCategory, setProjCategory] = useState('curtains');
   const [projLocEn, setProjLocEn] = useState('');
-  const [uploadedImage, setUploadedImage] = useState('');
+  const [uploadedImagePreview, setUploadedImagePreview] = useState('');
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Check existing session auth on load
   useEffect(() => {
@@ -50,15 +52,19 @@ export default function AdminPage() {
         }
       });
 
-    // Load Projects
-    const savedProjs = localStorage.getItem('twoline_completed_works');
-    if (savedProjs) {
-      try {
-        setProjects(JSON.parse(savedProjs));
-      } catch (e) {
-        setProjects([]);
-      }
-    }
+    // Load Projects from Backend
+    fetch('http://localhost:5000/api/projects')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setProjects(data);
+      })
+      .catch(err => {
+        console.error('API Error:', err);
+        const savedProjs = localStorage.getItem('twoline_completed_works');
+        if (savedProjs) {
+          try { setProjects(JSON.parse(savedProjs)); } catch (e) { setProjects([]); }
+        }
+      });
   };
 
   const handleLogin = (e) => {
@@ -84,17 +90,19 @@ export default function AdminPage() {
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setUploadedFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setUploadedImage(reader.result);
+        setUploadedImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
     }
   };
 
   // Add a new project manually
-  const handleAddProject = (e) => {
+  const handleAddProject = async (e) => {
     e.preventDefault();
+    setIsUploading(true);
     
     // Choose default showcase image based on category if no custom upload is provided
     let defaultImg = '/images/sheer.png';
@@ -142,34 +150,57 @@ export default function AdminPage() {
       locAr = 'عجمان';
     }
 
-    const newProj = {
-      id: Date.now(),
-      category: projCategory,
-      titleEn,
-      titleAr,
-      locationEn: projLocEn || 'Dubai, UAE',
-      locationAr: locAr,
-      image: uploadedImage || defaultImg
-    };
-
-    const updated = [newProj, ...projects];
-    setProjects(updated);
-    localStorage.setItem('twoline_completed_works', JSON.stringify(updated));
-
-    // Reset Form fields
-    setProjLocEn('');
-    setUploadedImage('');
+    const formData = new FormData();
+    formData.append('category', projCategory);
+    formData.append('titleEn', titleEn);
+    formData.append('titleAr', titleAr);
+    formData.append('locationEn', projLocEn || 'Dubai, UAE');
+    formData.append('locationAr', locAr);
     
-    // Clear file inputs on page
-    const fileInput = document.getElementById('project-image-file');
-    if (fileInput) fileInput.value = '';
+    if (uploadedFile) {
+      formData.append('image', uploadedFile);
+    } else {
+      formData.append('image', defaultImg);
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/projects', {
+        method: 'POST',
+        body: formData
+      });
+      
+      const newProj = await response.json();
+      
+      const updated = [newProj, ...projects];
+      setProjects(updated);
+      localStorage.setItem('twoline_completed_works', JSON.stringify(updated));
+
+      // Reset Form fields
+      setProjLocEn('');
+      setUploadedImagePreview('');
+      setUploadedFile(null);
+      
+      // Clear file inputs on page
+      const fileInput = document.getElementById('project-image-file');
+      if (fileInput) fileInput.value = '';
+    } catch (err) {
+      console.error('Failed to upload project', err);
+      alert('Error uploading. Make sure the backend is running.');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   // Delete a project
-  const handleDeleteProject = (id) => {
-    const updated = projects.filter(p => p.id !== id);
-    setProjects(updated);
-    localStorage.setItem('twoline_completed_works', JSON.stringify(updated));
+  const handleDeleteProject = async (id) => {
+    try {
+      await fetch(`http://localhost:5000/api/projects/${id}`, { method: 'DELETE' });
+      const updated = projects.filter(p => (p._id || p.id) !== id);
+      setProjects(updated);
+      localStorage.setItem('twoline_completed_works', JSON.stringify(updated));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   // Clear all inquiries
@@ -543,20 +574,20 @@ export default function AdminPage() {
                       fontSize: '0.85rem'
                     }}
                   />
-                  {uploadedImage && (
+                  {uploadedImagePreview && (
                     <div style={{ marginTop: 10 }}>
                       <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginBottom: 4 }}>
                         {isAr ? 'معاينة الصورة:' : 'Image Preview:'}
                       </p>
                       <div style={{ width: 80, height: 80, borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                        <img src={uploadedImage} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={uploadedImagePreview} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       </div>
                     </div>
                   )}
                 </div>
 
-                <button type="submit" className="btn btn-primary" style={{ justifyContent: 'center', marginTop: 12 }}>
-                  💾 {isAr ? 'حفظ المشروع ونشره' : 'Publish Completed Work'}
+                <button type="submit" disabled={isUploading} className="btn btn-primary" style={{ justifyContent: 'center', marginTop: 12, opacity: isUploading ? 0.7 : 1 }}>
+                  {isUploading ? '⏳ Uploading...' : '💾 ' + (isAr ? 'حفظ المشروع ونشره' : 'Publish Completed Work')}
                 </button>
               </form>
             </div>
@@ -575,7 +606,7 @@ export default function AdminPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                   {projects.map((p) => (
                     <div 
-                      key={p.id}
+                      key={p._id || p.id}
                       style={{
                         background: 'var(--surface-2)',
                         border: '1px solid var(--border)',
@@ -589,7 +620,7 @@ export default function AdminPage() {
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         <img 
-                          src={p.image} 
+                          src={p.imageUrl || p.image} 
                           alt={p.titleEn}
                           style={{
                             width: 60,
@@ -610,7 +641,7 @@ export default function AdminPage() {
                       </div>
                       
                       <button 
-                        onClick={() => handleDeleteProject(p.id)}
+                        onClick={() => handleDeleteProject(p._id || p.id)}
                         style={{
                           background: 'none',
                           border: 'none',

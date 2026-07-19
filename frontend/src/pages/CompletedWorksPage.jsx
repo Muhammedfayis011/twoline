@@ -10,14 +10,31 @@ export default function CompletedWorksPage() {
   const [projectsList, setProjectsList] = useState([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('twoline_completed_works');
-    if (saved) {
-      try {
-        setProjectsList(JSON.parse(saved));
-      } catch (e) {
-        setProjectsList([]);
-      }
-    }
+    // Load Projects from Backend API
+    fetch('http://localhost:5000/api/projects')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setProjectsList(data);
+        } else {
+          // Fallback to initial if database is empty
+          const saved = localStorage.getItem('twoline_completed_works');
+          if (saved) {
+            try { setProjectsList(JSON.parse(saved)); } catch (e) { setProjectsList(initialProjects); }
+          } else {
+            setProjectsList(initialProjects);
+          }
+        }
+      })
+      .catch(err => {
+        console.error('API Error:', err);
+        const saved = localStorage.getItem('twoline_completed_works');
+        if (saved) {
+          try { setProjectsList(JSON.parse(saved)); } catch (e) { setProjectsList(initialProjects); }
+        } else {
+          setProjectsList(initialProjects);
+        }
+      });
   }, []);
 
   const filteredItems = filter === 'all' 
@@ -126,7 +143,7 @@ export default function CompletedWorksPage() {
                   position: 'relative'
                 }}>
                   <img 
-                    src={item.image} 
+                    src={item.imageUrl || item.image} 
                     alt={isAr ? item.titleAr : item.titleEn} 
                     style={{ 
                       width: '100%', 
