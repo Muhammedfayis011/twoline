@@ -15,7 +15,6 @@
   align-items: flex-end;
 }
 
-/* Floating Button */
 .apollo-float-btn {
   display: flex;
   align-items: center;
@@ -23,10 +22,8 @@
   background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
   color: white;
   border: none;
-  width: 60px;
-  height: 60px;
-  padding: 0;
-  border-radius: 50%;
+  padding: 12px 20px;
+  border-radius: 50px;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 700;

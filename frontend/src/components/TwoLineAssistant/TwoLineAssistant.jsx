@@ -38,7 +38,7 @@ export default function TwoLineAssistant() {
         onClick={toggleChat}
         aria-label="Toggle Two Line Assistant"
       >
-        <span className="apollo-icon">✨</span>
+        <span className="apollo-btn-text">{isAr ? 'مساعد الذكاء الاصطناعي' : 'AI Assistant'}</span>
       </button>
 
       {/* Chat Window */}
