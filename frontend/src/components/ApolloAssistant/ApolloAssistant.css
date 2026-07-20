@@ -1,0 +1,210 @@
+.apollo-assistant-wrapper {
+  position: fixed;
+  bottom: 90px;
+  right: 28px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.apollo-assistant-wrapper.rtl {
+  right: auto;
+  left: 24px;
+  align-items: flex-start;
+}
+
+/* Floating Button */
+.apollo-float-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 50px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+  transition: all 0.3s ease;
+  animation: pulseGlow 2s infinite;
+}
+
+.apollo-float-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+}
+
+.apollo-icon {
+  font-size: 1.2rem;
+}
+
+/* Chat Window */
+.apollo-chat-window {
+  position: absolute;
+  bottom: 60px; /* Above the button */
+  right: 0;
+  width: 350px;
+  height: 500px;
+  max-height: 70vh;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: slideUpFade 0.3s ease;
+  transform-origin: bottom right;
+}
+
+.apollo-assistant-wrapper.rtl .apollo-chat-window {
+  right: auto;
+  left: 0;
+  transform-origin: bottom left;
+}
+
+.apollo-chat-header {
+  background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+  color: white;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.apollo-header-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.apollo-close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.apollo-close-btn:hover {
+  opacity: 1;
+}
+
+.apollo-chat-body {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+  background: var(--surface-2, #f9fafb);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.apollo-msg-row {
+  display: flex;
+  width: 100%;
+}
+
+.apollo-msg-row.assistant {
+  justify-content: flex-start;
+}
+
+.apollo-msg-row.user {
+  justify-content: flex-end;
+}
+
+.apollo-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.apollo-msg-row.assistant .apollo-bubble {
+  background: white;
+  border: 1px solid var(--border, #e5e7eb);
+  color: var(--text, #111827);
+  border-bottom-left-radius: 4px;
+}
+
+.apollo-msg-row.user .apollo-bubble {
+  background: #3B82F6;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.apollo-chat-footer {
+  display: flex;
+  padding: 12px;
+  background: var(--surface, #ffffff);
+  border-top: 1px solid var(--border, #e5e7eb);
+  gap: 8px;
+}
+
+.apollo-chat-footer input {
+  flex: 1;
+  padding: 10px 14px;
+  border: 1px solid var(--border-strong, #d1d5db);
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  background: var(--surface-2, #f9fafb);
+  color: var(--text, #111827);
+}
+
+.apollo-chat-footer input:focus {
+  border-color: #3B82F6;
+}
+
+.apollo-send-btn {
+  background: #3B82F6;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.apollo-send-btn:hover {
+  background: #2563EB;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+  .apollo-chat-window {
+    width: calc(100vw - 48px); /* Full width minus margin */
+  }
+}

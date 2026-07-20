@@ -11,6 +11,7 @@ import ContactPage from './pages/ContactPage';
 import CompletedWorksPage from './pages/CompletedWorksPage';
 import AdminPage from './pages/AdminPage';
 import { logInquiry } from './utils/logInquiry';
+import ApolloAssistant from './components/ApolloAssistant/ApolloAssistant';
 
 export default function App() {
   const [loading, setLoading] = useState(true);
@@ -83,6 +84,9 @@ export default function App() {
       >
         💬 WhatsApp
       </button>
+
+      {/* Apollo AI Assistant Widget */}
+      <ApolloAssistant />
     </>
   );
 }
