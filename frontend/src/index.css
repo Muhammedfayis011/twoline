@@ -1981,16 +1981,28 @@ footer {
   z-index: 999;
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
   background: #25D366;
   color: white;
-  padding: 14px 20px;
-  border-radius: var(--radius-full);
-  font-weight: 700;
-  font-size: 0.9rem;
-  box-shadow: 0 6px 24px rgba(37,211,102,0.4);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
   transition: all var(--transition);
   text-decoration: none;
+  animation: whatsappBloom 2s infinite;
+}
+
+@keyframes whatsappBloom {
+  0% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 15px rgba(37, 211, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(37, 211, 102, 0);
+  }
 }
 
 [dir="rtl"] .whatsapp-float {
