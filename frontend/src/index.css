@@ -1307,8 +1307,10 @@ input, textarea, select {
 }
 
 .product-gallery {
+  position: -webkit-sticky;
   position: sticky;
-  top: 90px;
+  top: 100px;
+  align-self: start;
 }
 
 .gallery-main {
